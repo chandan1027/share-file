@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +48,11 @@ public class UploadController {
         file.transferTo(destination);
 
         String filename = file.getOriginalFilename();
-String fileUrl = "/files/" + filename;
+
+String encodedFilename =
+        URLEncoder.encode(filename, StandardCharsets.UTF_8);
+
+String fileUrl = "/files/" + encodedFilename;
 
 redirectAttributes.addFlashAttribute(
         "message",
@@ -57,7 +64,9 @@ redirectAttributes.addFlashAttribute(
 );
 
 
+
         return "redirect:/dashboard";
     }
 }
+
 
