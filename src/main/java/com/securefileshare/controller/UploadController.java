@@ -44,16 +44,20 @@ public class UploadController {
         File destination = new File(dir, file.getOriginalFilename());
         file.transferTo(destination);
 
-        redirectAttributes.addFlashAttribute(
-                "message",
-                "File uploaded successfully: " + file.getOriginalFilename()
-        );
+        String filename = file.getOriginalFilename();
+String fileUrl = "/files/" + filename;
 
-        redirectAttributes.addFlashAttribute(
-                "shareLink",
-                "/files/" + file.getOriginalFilename()
-        );
+redirectAttributes.addFlashAttribute(
+        "message",
+        "File uploaded successfully: " + filename
+);
+redirectAttributes.addFlashAttribute(
+        "fileUrl",
+        fileUrl
+);
+
 
         return "redirect:/dashboard";
     }
 }
+
