@@ -1,5 +1,6 @@
 package com.securefileshare.controller;
 
+import com.securefileshare.model.User;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -8,9 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.File;
+import java.io.IOException;
 
 @Controller
 public class UploadController {
@@ -23,10 +23,11 @@ public class UploadController {
             @RequestParam("file") MultipartFile file,
             HttpSession session,
             RedirectAttributes redirectAttributes
-    ) throws Exception {
+    ) throws IOException {
 
-        String username = (String) session.getAttribute("username");
-        if (username == null) {
+        // ✅ CORRECT session check
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) {
             return "redirect:/login";
         }
 
@@ -35,16 +36,19 @@ public class UploadController {
             return "redirect:/dashboard";
         }
 
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-        Files.createDirectories(uploadPath);
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
-        Path filePath = uploadPath.resolve(file.getOriginalFilename());
-        file.transferTo(filePath.toFile());
+        File destination = new File(dir, file.getOriginalFilename());
+        file.transferTo(destination);
 
         redirectAttributes.addFlashAttribute(
                 "message",
-                "File uploaded successfully"
+                "File uploaded successfully: " + file.getOriginalFilename()
         );
+
         redirectAttributes.addFlashAttribute(
                 "shareLink",
                 "/files/" + file.getOriginalFilename()
